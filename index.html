@@ -1,0 +1,951 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Arbeit · Energie · Leistung · Wirkungsgrad</title>
+<style>
+:root{
+  --bg:#f3f5fa; --card:#fff; --ink:#1c2333; --muted:#5d667a; --line:#dde2ec;
+  --arbeit:#2563eb; --energie:#15803d; --leistung:#ea580c; --wirkung:#7c3aed;
+  --ok:#16a34a; --bad:#dc2626;
+  --c:#2563eb; --c-soft:#e8efff;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:"Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif;background:var(--bg);color:var(--ink);line-height:1.5;font-size:17px}
+header{background:#1c2333;color:#fff;padding:14px 24px;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+header h1{font-size:20px;margin:0;font-weight:650;flex:1}
+header button{background:#ffffff1a;color:#fff;border:1px solid #ffffff40;border-radius:8px;padding:7px 14px;font:inherit;font-size:15px;cursor:pointer}
+header button:hover{background:#ffffff30}
+main{max-width:1050px;margin:0 auto;padding:24px 18px 60px}
+h2{margin:0 0 6px;font-size:28px}
+h3{margin:28px 0 10px;font-size:21px}
+p{margin:8px 0}
+.muted{color:var(--muted)}
+.card{background:var(--card);border-radius:14px;padding:20px 22px;box-shadow:0 1px 3px #0000000f,0 4px 14px #00000008;margin:16px 0}
+
+/* Start */
+.topics{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:18px;margin-top:22px}
+.topic-btn{border:none;border-radius:16px;padding:26px 20px;text-align:left;cursor:pointer;color:#fff;font:inherit;box-shadow:0 4px 14px #0000001c;transition:transform .15s}
+.topic-btn:hover{transform:translateY(-3px)}
+.topic-btn .big{font-size:40px;display:block}
+.topic-btn b{font-size:23px;display:block;margin:6px 0 4px}
+.topic-btn span.f{font-family:Georgia,serif;font-size:19px;opacity:.95}
+.topic-btn small{display:block;margin-top:8px;opacity:.9;font-size:14px}
+
+/* Topic layout */
+.topic{display:none}
+.topic.active{display:block}
+.topic-head{border-left:6px solid var(--c);padding-left:14px;margin-bottom:10px}
+.steps{display:flex;gap:8px;flex-wrap:wrap;margin:16px 0 4px}
+.steps button{border:2px solid var(--c);background:#fff;color:var(--c);border-radius:999px;padding:7px 16px;font:inherit;font-size:15px;font-weight:600;cursor:pointer}
+.steps button.on{background:var(--c);color:#fff}
+.step{display:none}
+.step.on{display:block}
+.nav{display:flex;justify-content:space-between;margin-top:22px;gap:10px}
+.btn{background:var(--c);color:#fff;border:none;border-radius:10px;padding:10px 18px;font:inherit;font-weight:600;cursor:pointer}
+.btn.ghost{background:#fff;color:var(--c);border:2px solid var(--c)}
+.btn:disabled{opacity:.35;cursor:default}
+
+/* Formula box */
+.formula-row{display:flex;gap:22px;flex-wrap:wrap;align-items:center}
+.formula{font-family:Georgia,"Times New Roman",serif;font-size:34px;background:var(--c-soft);border:2px solid var(--c);border-radius:14px;padding:12px 26px;display:inline-block}
+.formula small{font-size:18px}
+.legend{list-style:none;padding:0;margin:0}
+.legend li{margin:3px 0}
+.legend b{font-family:Georgia,serif;display:inline-block;min-width:44px;color:var(--c)}
+.frac{display:inline-flex;flex-direction:column;vertical-align:middle;text-align:center;margin:0 4px}
+.frac>span:first-child{border-bottom:2px solid currentColor;padding:0 4px}
+.frac>span:last-child{padding:0 4px}
+.forms3{display:flex;gap:12px;flex-wrap:wrap;margin-top:10px}
+.forms3 div{font-family:Georgia,serif;font-size:21px;background:#fff;border:1px solid var(--line);border-radius:10px;padding:6px 14px}
+.info{background:#fff8e6;border-left:5px solid #f2b705;border-radius:8px;padding:10px 14px;margin:14px 0}
+
+/* Form cards */
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}
+.fcard{border:2px solid var(--line);border-radius:12px;padding:14px;background:#fff}
+.fcard h4{margin:6px 0 4px;color:var(--c);font-size:18px}
+.fcard .fx{font-family:Georgia,serif;font-size:18px;margin:4px 0}
+.fcard p{font-size:15px;margin:4px 0;color:var(--muted)}
+.fcard svg{width:100%;height:auto;max-height:110px}
+.icon{font-size:34px}
+
+svg text{font-family:"Segoe UI",system-ui,Arial,sans-serif}
+
+/* Zuordnung */
+.pool{min-height:70px;border:2px dashed var(--line);border-radius:12px;padding:10px;display:flex;flex-wrap:wrap;gap:8px;background:#fafbfd}
+.item{background:#fff;border:2px solid var(--c);border-radius:10px;padding:7px 11px;font-size:15px;cursor:grab;user-select:none;touch-action:manipulation;max-width:100%}
+.item.sel{background:var(--c);color:#fff;box-shadow:0 0 0 4px #0000001a}
+.item.right{border-color:var(--ok);background:#e8f8ee;color:#0f5132}
+.item.wrong{border-color:var(--bad);background:#fdecec;color:#7f1d1d}
+.zones{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px;margin-top:14px}
+.zone{border:2px solid var(--c);border-radius:12px;background:var(--c-soft);min-height:120px;padding:8px;display:flex;flex-direction:column;gap:6px;cursor:pointer}
+.zone h5{margin:0 0 4px;font-size:16px;color:var(--c);display:flex;align-items:center;gap:6px}
+.zone.over{outline:4px solid #0000001f}
+.zone .item{font-size:14px}
+.result{font-weight:600;margin-top:12px;min-height:24px}
+
+/* Aufgaben */
+.task{border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin:14px 0;background:#fff}
+.task-head{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.tag{display:inline-block;background:var(--c-soft);color:var(--c);border-radius:999px;padding:2px 11px;font-size:13px;font-weight:700}
+.tag.hard{background:#fde8e8;color:#b91c1c}
+.task h4{margin:0;font-size:18px}
+.hold{margin-top:10px;background:var(--c);color:#fff;border:none;border-radius:10px;padding:10px 18px;font:inherit;font-weight:600;cursor:pointer;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;touch-action:none}
+.hold.active{filter:brightness(.85);transform:scale(.98)}
+.sol-wrap{margin-top:10px}
+.sol-hidden{color:var(--muted);font-size:14px;font-style:italic}
+.sol{display:none;background:#f6fff8;border:2px solid var(--ok);border-radius:10px;padding:10px 14px}
+.sol-wrap.show .sol{display:block}
+.sol-wrap.show .sol-hidden{display:none}
+.sol table{border-collapse:collapse}
+.sol td{padding:3px 10px 3px 0;vertical-align:top}
+.sol td:first-child{font-weight:700;white-space:nowrap}
+.sol .res{font-weight:700;color:#0f5132;font-size:18px}
+.mono{font-family:Georgia,serif}
+
+/* Leistung Visualisierung */
+.race-wrap{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:700px){.race-wrap{grid-template-columns:1fr}}
+.timer{font-family:Georgia,serif;font-size:22px;font-weight:700}
+.sliders{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;margin:10px 0}
+.sliders label{font-weight:600}
+input[type=range]{width:100%;accent-color:var(--c)}
+.blocks-area{display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;min-height:120px;padding:12px;border:1px solid var(--line);border-radius:12px;background:#fafbfd;overflow-x:auto}
+.col{display:flex;flex-direction:column-reverse;align-items:center;gap:2px;min-width:44px}
+.col .lbl{font-size:12px;color:var(--muted);margin-top:4px}
+.blk{width:38px;height:10px;background:var(--c);border-radius:2px;opacity:.9}
+.col.hide{visibility:hidden}
+.bigP{font-family:Georgia,serif;font-size:26px}
+
+/* Wirkungsgrad */
+.bars div.bar{display:flex;align-items:center;gap:10px;margin:6px 0;font-size:15px}
+.bars .name{width:200px}
+.bars .track{flex:1;background:#eee;border-radius:6px;height:18px;overflow:hidden}
+.bars .fill{height:100%;background:var(--c)}
+.bars .val{width:70px;text-align:right;font-weight:700}
+@media(max-width:560px){.bars .name{width:120px}.formula{font-size:26px}}
+.video{position:relative;width:100%;max-width:760px;aspect-ratio:16/9;border-radius:12px;overflow:hidden;background:#000}
+.video iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+.vlink{display:inline-block;margin-top:10px;color:var(--c);font-weight:600}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>⚙️ Arbeit · Energie · Leistung · Wirkungsgrad</h1>
+  <button id="homeBtn" onclick="goHome()">⌂ Themenauswahl</button>
+</header>
+
+<main>
+
+<!-- =================== START =================== -->
+<section id="home" class="topic active">
+  <h2>Wähle ein Thema</h2>
+  <p class="muted">Jedes Thema läuft nach dem gleichen Schema ab: <b>Erklärung</b> mit Schaubild → <b>Übung</b> → <b>Rechenaufgaben</b>.
+  Bei den Rechenaufgaben siehst du die Lösung nur, <b>solange du den Lösungsknopf gedrückt hältst</b>.</p>
+  <div class="topics">
+    <button class="topic-btn" style="background:var(--arbeit)" onclick="openTopic('arbeit')">
+      <span class="big">🏋️</span><b>Arbeit</b><span class="f">W = F · s</span>
+      <small>Arbeitsformen · Zuordnung · 6 Aufgaben</small></button>
+    <button class="topic-btn" style="background:var(--energie)" onclick="openTopic('energie')">
+      <span class="big">🔋</span><b>Energie</b><span class="f">E<sub>pot</sub> = m·g·h</span>
+      <small>Energieformen · Zuordnung · 6 Aufgaben</small></button>
+    <button class="topic-btn" style="background:var(--leistung)" onclick="openTopic('leistung')">
+      <span class="big">⚡</span><b>Leistung</b><span class="f">P = W / t</span>
+      <small>Erklärung · Veranschaulichung · 6 Aufgaben</small></button>
+    <button class="topic-btn" style="background:var(--wirkung)" onclick="openTopic('wirkung')">
+      <span class="big">🔥</span><b>Wirkungsgrad</b><span class="f">η = E<sub>nutz</sub> / E<sub>zu</sub></span>
+      <small>Erklärung · 5 Aufgaben (mit Umrechnen)</small></button>
+  </div>
+</section>
+
+<!-- =================== ARBEIT =================== -->
+<section id="arbeit" class="topic" data-color="--arbeit" data-soft="#e8efff">
+  <div class="topic-head"><h2>🏋️ Mechanische Arbeit</h2></div>
+  <div class="steps"></div>
+
+  <div class="step" data-title="1 · Erklärung">
+    <div class="card">
+      <h3 style="margin-top:0">Was ist Arbeit?</h3>
+      <p>In der Physik wird <b>Arbeit verrichtet</b>, wenn ein Körper durch eine <b>Kraft</b> entlang eines <b>Weges</b> bewegt oder verformt wird. Kraft und Weg müssen dabei in die gleiche Richtung zeigen.</p>
+      <svg viewBox="0 0 640 230" width="100%" role="img" aria-label="Schaubild: Eine Person schiebt eine Kiste mit der Kraft F über den Weg s">
+        <defs>
+          <marker markerUnits="userSpaceOnUse" viewBox="0 0 10 10" id="arA" markerWidth="16" markerHeight="16" refX="8" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#2563eb"/></marker>
+          <marker markerUnits="userSpaceOnUse" viewBox="0 0 10 10" id="arG" markerWidth="16" markerHeight="16" refX="8" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#ea580c"/></marker>
+          <marker markerUnits="userSpaceOnUse" viewBox="0 0 10 10" id="arGs" markerWidth="16" markerHeight="16" refX="2" refY="5" orient="auto"><path d="M10,0 L0,5 L10,10 z" fill="#ea580c"/></marker>
+          <pattern id="hatch" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M0,10 L10,0" stroke="#9aa3b5" stroke-width="1.5"/></pattern>
+        </defs>
+        <rect x="20" y="170" width="600" height="14" fill="url(#hatch)"/>
+        <line x1="20" y1="170" x2="620" y2="170" stroke="#475069" stroke-width="3"/>
+        <!-- Startposition -->
+        <rect x="80" y="100" width="80" height="70" fill="none" stroke="#9aa3b5" stroke-width="2" stroke-dasharray="6 5" rx="4"/>
+        <text x="120" y="92" text-anchor="middle" font-size="14" fill="#7a8396">Start</text>
+        <!-- Person -->
+        <g stroke="#1c2333" stroke-width="4" stroke-linecap="round" fill="none">
+          <circle cx="336" cy="84" r="13" fill="#ffd9b3"/>
+          <line x1="340" y1="97" x2="356" y2="135"/>
+          <line x1="356" y1="135" x2="334" y2="170"/>
+          <line x1="356" y1="135" x2="368" y2="170"/>
+          <line x1="346" y1="110" x2="380" y2="122"/>
+          <line x1="346" y1="112" x2="380" y2="135"/>
+        </g>
+        <!-- Kiste -->
+        <rect x="380" y="100" width="80" height="70" fill="#cfe0ff" stroke="#2563eb" stroke-width="3" rx="4"/>
+        <line x1="380" y1="100" x2="460" y2="170" stroke="#2563eb" stroke-width="1.5" opacity=".5"/>
+        <line x1="460" y1="100" x2="380" y2="170" stroke="#2563eb" stroke-width="1.5" opacity=".5"/>
+        <!-- Kraftpfeil -->
+        <line x1="420" y1="135" x2="560" y2="135" stroke="#2563eb" stroke-width="6" marker-end="url(#arA)"/>
+        <text x="500" y="122" font-size="22" font-weight="700" fill="#2563eb" font-family="Georgia,serif">F</text>
+        <text x="525" y="122" font-size="14" fill="#2563eb">(Kraft in N)</text>
+        <!-- Weg -->
+        <line x1="124" y1="208" x2="416" y2="208" stroke="#ea580c" stroke-width="4" marker-end="url(#arG)" marker-start="url(#arGs)"/>
+        <line x1="120" y1="196" x2="120" y2="220" stroke="#ea580c" stroke-width="2"/>
+        <line x1="420" y1="196" x2="420" y2="220" stroke="#ea580c" stroke-width="2"/>
+        <text x="250" y="200" font-size="22" font-weight="700" fill="#ea580c" font-family="Georgia,serif">s</text>
+        <text x="266" y="200" font-size="14" fill="#ea580c">(Weg in m)</text>
+        <text x="20" y="30" font-size="17" fill="#1c2333">Je größer die Kraft und je länger der Weg, desto mehr Arbeit wird verrichtet.</text>
+      </svg>
+      <div class="formula-row" style="margin-top:10px">
+        <div class="formula">W = F · s</div>
+        <ul class="legend">
+          <li><b>W</b> Arbeit in Joule (J)</li>
+          <li><b>F</b> Kraft in Newton (N)</li>
+          <li><b>s</b> Weg in Meter (m)</li>
+          <li class="muted">1 J = 1 N · 1 m = 1 Nm &nbsp;|&nbsp; 1 kJ = 1000 J</li>
+        </ul>
+        <div class="tri" data-top="W" data-l="F" data-r="s" data-op="·"></div>
+      </div>
+      <div class="forms3"><div>W = F · s</div><div>F = <span class="frac"><span>W</span><span>s</span></span></div><div>s = <span class="frac"><span>W</span><span>F</span></span></div></div>
+      <div class="info">💡 <b>Formeldreieck:</b> Halte die gesuchte Größe zu – was übrig bleibt, ist die Rechnung. Stehen zwei Größen nebeneinander, wird multipliziert; steht eine über der anderen, wird geteilt.</div>
+    </div>
+
+    <div class="card">
+      <h3 style="margin-top:0">Verschiedene Arten der Arbeit</h3>
+      <div class="grid">
+        <div class="fcard">
+          <svg viewBox="0 0 160 100"><defs><marker markerUnits="userSpaceOnUse" viewBox="0 0 8 8" id="u1" markerWidth="13" markerHeight="13" refX="4" refY="7" orient="auto-start-reverse"><path d="M0,8 L4,0 L8,8 z" fill="#2563eb"/></marker></defs>
+            <line x1="10" y1="92" x2="150" y2="92" stroke="#475069" stroke-width="3"/>
+            <rect x="40" y="62" width="34" height="30" fill="none" stroke="#9aa3b5" stroke-dasharray="4 3" stroke-width="2"/>
+            <rect x="40" y="10" width="34" height="30" fill="#cfe0ff" stroke="#2563eb" stroke-width="2.5"/>
+            <line x1="100" y1="88" x2="100" y2="14" stroke="#2563eb" stroke-width="3" marker-end="url(#u1)"/>
+            <text x="108" y="56" font-size="16" font-family="Georgia,serif" fill="#2563eb" font-weight="700">h</text></svg>
+          <h4>Hubarbeit</h4>
+          <div class="fx">W<sub>H</sub> = F<sub>G</sub> · h = m · g · h</div>
+          <p>Ein Körper wird gegen die Gewichtskraft nach oben gehoben.</p>
+        </div>
+        <div class="fcard">
+          <svg viewBox="0 0 160 100"><defs><marker markerUnits="userSpaceOnUse" viewBox="0 0 8 8" id="u2" markerWidth="13" markerHeight="13" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#2563eb"/></marker><marker markerUnits="userSpaceOnUse" viewBox="0 0 8 8" id="u2r" markerWidth="13" markerHeight="13" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#dc2626"/></marker></defs>
+            <path d="M10,92 l8,-6 l8,6 l8,-6 l8,6 l8,-6 l8,6 l8,-6 l8,6 l8,-6 l8,6 l8,-6 l8,6 l8,-6 l8,6 l8,-6 l8,6 l4,-3" fill="none" stroke="#475069" stroke-width="2.5"/>
+            <rect x="55" y="52" width="40" height="34" fill="#cfe0ff" stroke="#2563eb" stroke-width="2.5"/>
+            <line x1="95" y1="68" x2="148" y2="68" stroke="#2563eb" stroke-width="3" marker-end="url(#u2)"/>
+            <line x1="55" y1="80" x2="20" y2="80" stroke="#dc2626" stroke-width="3" marker-end="url(#u2r)"/>
+            <text x="118" y="60" font-size="14" font-family="Georgia,serif" fill="#2563eb" font-weight="700">F</text>
+            <text x="18" y="72" font-size="13" font-family="Georgia,serif" fill="#dc2626" font-weight="700">F<tspan font-size="9" dy="3">R</tspan></text></svg>
+          <h4>Reibungsarbeit</h4>
+          <div class="fx">W<sub>R</sub> = F<sub>R</sub> · s</div>
+          <p>Ein Körper wird gegen die Reibungskraft bewegt (z. B. Schieben, Schleifen).</p>
+        </div>
+        <div class="fcard">
+          <svg viewBox="0 0 160 100"><defs><marker markerUnits="userSpaceOnUse" viewBox="0 0 8 8" id="u3" markerWidth="13" markerHeight="13" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#2563eb"/></marker></defs>
+            <line x1="10" y1="92" x2="150" y2="92" stroke="#475069" stroke-width="3"/>
+            <rect x="62" y="52" width="58" height="26" rx="5" fill="#cfe0ff" stroke="#2563eb" stroke-width="2.5"/>
+            <circle cx="76" cy="83" r="8" fill="#475069"/><circle cx="106" cy="83" r="8" fill="#475069"/>
+            <line x1="18" y1="56" x2="50" y2="56" stroke="#9aa3b5" stroke-width="3" stroke-linecap="round"/>
+            <line x1="26" y1="66" x2="54" y2="66" stroke="#9aa3b5" stroke-width="3" stroke-linecap="round"/>
+            <line x1="14" y1="76" x2="48" y2="76" stroke="#9aa3b5" stroke-width="3" stroke-linecap="round"/>
+            <line x1="80" y1="34" x2="140" y2="34" stroke="#2563eb" stroke-width="3" marker-end="url(#u3)"/>
+            <text x="100" y="26" font-size="15" font-family="Georgia,serif" fill="#2563eb" font-weight="700">v</text></svg>
+          <h4>Beschleunigungsarbeit</h4>
+          <div class="fx">W<sub>B</sub> = ½ · m · v²</div>
+          <p>Ein Körper wird schneller gemacht (beschleunigt).</p>
+        </div>
+        <div class="fcard">
+          <svg viewBox="0 0 160 100"><defs><marker markerUnits="userSpaceOnUse" viewBox="0 0 8 8" id="u4" markerWidth="13" markerHeight="13" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#2563eb"/></marker></defs>
+            <rect x="10" y="20" width="12" height="70" fill="url(#hatch)" stroke="#475069" stroke-width="2"/>
+            <path d="M22,55 l6,-14 l8,28 l8,-28 l8,28 l8,-28 l8,28 l8,-28 l8,28 l6,-14" fill="none" stroke="#2563eb" stroke-width="3"/>
+            <rect x="96" y="44" width="10" height="22" fill="#2563eb"/>
+            <line x1="108" y1="55" x2="150" y2="55" stroke="#2563eb" stroke-width="3" marker-end="url(#u4)"/>
+            <text x="122" y="45" font-size="15" font-family="Georgia,serif" fill="#2563eb" font-weight="700">F</text></svg>
+          <h4>Spannarbeit (Verformungsarbeit)</h4>
+          <div class="fx">W<sub>S</sub> = ½ · D · s²</div>
+          <p>Ein Körper (z. B. eine Feder) wird gespannt oder verformt.</p>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <h3 style="margin-top:0">🎬 Erklärvideo</h3>
+      <p class="muted">Arbeit (W = F · s) – Was ist das? | Lehrerschmidt</p>
+      <div class="video"><iframe src="https://www.youtube-nocookie.com/embed/RNZRxwBDk0k" title="Arbeit (W = F · s) – Was ist das? | Lehrerschmidt" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" allow="accelerometer; encrypted-media; gyroscope; picture-in-picture; fullscreen" allowfullscreen></iframe></div>
+      <a class="vlink" href="https://www.youtube.com/watch?v=RNZRxwBDk0k" target="_blank" rel="noopener">▶ Video direkt auf YouTube öffnen</a>
+    </div>
+  </div>
+
+  <div class="step" data-title="2 · Zuordnung">
+    <div class="card">
+      <h3 style="margin-top:0">Welche Art von Arbeit wird verrichtet?</h3>
+      <p class="muted">Ziehe jede Karte in das richtige Feld. <b>Am Tablet:</b> erst Karte antippen, dann das Feld antippen. Danach auf „Überprüfen“ klicken.</p>
+      <div class="match" data-set="arbeit"></div>
+    </div>
+  </div>
+
+  <div class="step" data-title="3 · Aufgaben">
+    <div class="card">
+      <h3 style="margin-top:0">Rechenaufgaben zu W = F · s</h3>
+      <p class="muted">Schreibe immer: <b>Gegeben – Gesucht – Formel – Rechnung – Ergebnis</b>. Halte den Knopf gedrückt, um deine Lösung zu vergleichen.</p>
+      <div class="forms3"><div>W = F · s</div><div>F = <span class="frac"><span>W</span><span>s</span></span></div><div>s = <span class="frac"><span>W</span><span>F</span></span></div></div>
+      <div class="info sigbox">🔢 <b>Gültige Ziffern:</b> Das Ergebnis darf nur so viele gültige Ziffern haben wie die <b>ungenaueste</b> Angabe.
+Gezählt wird ab der ersten Ziffer, die nicht 0 ist: <span class="mono">8,0 m</span> → 2 &nbsp;|&nbsp; <span class="mono">2,34 N</span> → 3 &nbsp;|&nbsp; <span class="mono">0,050 kg</span> → 2.
+Exakte Zahlen (z. B. ½, 2) und Umrechnungsfaktoren (1 min = 60 s) zählen nicht.
+Ist ein Ergebnis wie „1000 J“ nicht eindeutig, schreibe es mit <b>Präfix</b> (1,00 kJ) oder <b>Zehnerpotenz</b> (1,00 · 10³ J). Rundet erst am Ende!</div>
+      <div class="tasks" data-set="arbeit"></div>
+    </div>
+  </div>
+  <div class="nav"><button class="btn ghost prev">← Zurück</button><button class="btn next">Weiter →</button></div>
+</section>
+
+<!-- =================== ENERGIE =================== -->
+<section id="energie" class="topic" data-color="--energie" data-soft="#e6f6ec">
+  <div class="topic-head"><h2>🔋 Energie</h2></div>
+  <div class="steps"></div>
+
+  <div class="step" data-title="1 · Erklärung">
+    <div class="card">
+      <h3 style="margin-top:0">Was ist Energie?</h3>
+      <p><b>Energie</b> ist die Fähigkeit eines Körpers, <b>Arbeit zu verrichten</b>, Wärme abzugeben oder Licht auszusenden. Wird an einem Körper Arbeit verrichtet, ist diese Arbeit danach als Energie in ihm <b>gespeichert</b>. Energie und Arbeit haben deshalb die gleiche Einheit: <b>Joule (J)</b>.</p>
+      <svg viewBox="0 0 680 250" width="100%" role="img" aria-label="Schaubild: Arbeit wird als Energie gespeichert und wieder abgegeben">
+        <defs>
+          <marker markerUnits="userSpaceOnUse" viewBox="0 0 12 12" id="eA" markerWidth="19" markerHeight="19" refX="10" refY="6" orient="auto"><path d="M0,0 L12,6 L0,12 z" fill="#15803d"/></marker>
+          <marker markerUnits="userSpaceOnUse" viewBox="0 0 8 8" id="eB" markerWidth="13" markerHeight="13" refX="4" refY="7" orient="auto-start-reverse"><path d="M0,8 L4,0 L8,8 z" fill="#15803d"/></marker>
+        </defs>
+        <!-- Box 1 -->
+        <rect x="10" y="20" width="200" height="210" rx="14" fill="#fff" stroke="#15803d" stroke-width="2.5"/>
+        <text x="110" y="46" text-anchor="middle" font-size="16" font-weight="700" fill="#15803d">① Arbeit verrichten</text>
+        <line x1="40" y1="190" x2="180" y2="190" stroke="#475069" stroke-width="3"/>
+        <rect x="140" y="80" width="40" height="8" fill="#9aa3b5"/>
+        <circle cx="88" cy="168" r="16" fill="none" stroke="#9aa3b5" stroke-width="2" stroke-dasharray="4 3"/>
+        <circle cx="160" cy="64" r="16" fill="#f59e0b"/>
+        <path d="M88,148 C 95,90 120,70 140,66" fill="none" stroke="#15803d" stroke-width="2.5" stroke-dasharray="5 4" marker-end="url(#eA)"/>
+        <text x="110" y="214" text-anchor="middle" font-size="13" fill="#1c2333">Ball wird hochgehoben</text>
+        <text x="110" y="228" text-anchor="middle" font-size="13" fill="#5d667a">(Hubarbeit)</text>
+        <!-- Pfeil -->
+        <line x1="214" y1="125" x2="246" y2="125" stroke="#15803d" stroke-width="5" marker-end="url(#eA)"/>
+        <!-- Box 2 -->
+        <rect x="250" y="20" width="200" height="210" rx="14" fill="#e6f6ec" stroke="#15803d" stroke-width="2.5"/>
+        <text x="350" y="46" text-anchor="middle" font-size="16" font-weight="700" fill="#15803d">② Energie gespeichert</text>
+        <line x1="280" y1="190" x2="420" y2="190" stroke="#475069" stroke-width="3"/>
+        <rect x="320" y="80" width="60" height="8" fill="#9aa3b5"/>
+        <circle cx="350" cy="64" r="16" fill="#f59e0b"/>
+        <line x1="400" y1="186" x2="400" y2="90" stroke="#15803d" stroke-width="2.5" marker-end="url(#eB)" marker-start="url(#eB)"/>
+        <text x="408" y="145" font-size="16" font-family="Georgia,serif" font-weight="700" fill="#15803d">h</text>
+        <text x="350" y="214" text-anchor="middle" font-size="13" fill="#1c2333">Ball hat Lageenergie</text>
+        <text x="350" y="228" text-anchor="middle" font-size="13" fill="#5d667a">E<tspan font-size="9" dy="3">pot</tspan><tspan dy="-3"> = m · g · h</tspan></text>
+        <!-- Pfeil -->
+        <line x1="454" y1="125" x2="486" y2="125" stroke="#15803d" stroke-width="5" marker-end="url(#eA)"/>
+        <!-- Box 3 -->
+        <rect x="470" y="20" width="200" height="210" rx="14" fill="#fff" stroke="#15803d" stroke-width="2.5" transform="translate(20,0)"/>
+        <text x="590" y="46" text-anchor="middle" font-size="16" font-weight="700" fill="#15803d">③ Energie umwandeln</text>
+        <line x1="520" y1="190" x2="660" y2="190" stroke="#475069" stroke-width="3"/>
+        <circle cx="590" cy="70" r="12" fill="none" stroke="#f59e0b" stroke-width="2" opacity=".5"/>
+        <circle cx="590" cy="110" r="14" fill="none" stroke="#f59e0b" stroke-width="2" opacity=".7"/>
+        <circle cx="590" cy="160" r="16" fill="#f59e0b"/>
+        <line x1="625" y1="80" x2="625" y2="160" stroke="#15803d" stroke-width="3" marker-end="url(#eA)"/>
+        <text x="632" y="125" font-size="16" font-family="Georgia,serif" font-weight="700" fill="#15803d">v</text>
+        <text x="590" y="214" text-anchor="middle" font-size="13" fill="#1c2333">Ball fällt: Bewegungsenergie</text>
+        <text x="590" y="228" text-anchor="middle" font-size="13" fill="#5d667a">E<tspan font-size="9" dy="3">kin</tspan><tspan dy="-3"> = ½ · m · v²</tspan></text>
+      </svg>
+      <div class="info">⚖️ <b>Energieerhaltungssatz:</b> Energie kann nicht erzeugt oder vernichtet werden. Sie wird nur von einer Form in eine andere <b>umgewandelt</b>.</div>
+    </div>
+
+    <div class="card">
+      <h3 style="margin-top:0">Energieformen</h3>
+      <div class="grid">
+        <div class="fcard"><div class="icon">⛰️</div><h4>Lageenergie (potentielle Energie)</h4><div class="fx">E<sub>pot</sub> = m · g · h</div><p>Ein Körper befindet sich in einer bestimmten Höhe – z. B. Wasser im Stausee.</p></div>
+        <div class="fcard"><div class="icon">🚗</div><h4>Bewegungsenergie (kinetische Energie)</h4><div class="fx">E<sub>kin</sub> = ½ · m · v²</div><p>Ein Körper bewegt sich – z. B. ein fahrendes Auto.</p></div>
+        <div class="fcard"><div class="icon">🏹</div><h4>Spannenergie</h4><div class="fx">E<sub>S</sub> = ½ · D · s²</div><p>Ein Körper ist gespannt oder verformt – z. B. ein gespannter Bogen.</p></div>
+        <div class="fcard"><div class="icon">🌡️</div><h4>Thermische Energie (Wärme)</h4><p>Steckt in warmen Körpern – z. B. heißer Tee.</p></div>
+        <div class="fcard"><div class="icon">🔌</div><h4>Elektrische Energie</h4><p>Wird durch elektrischen Strom übertragen – z. B. aus der Steckdose.</p></div>
+        <div class="fcard"><div class="icon">🍫</div><h4>Chemische Energie</h4><p>Ist in Stoffen gespeichert – z. B. Nahrung, Benzin, Holz.</p></div>
+        <div class="fcard"><div class="icon">☀️</div><h4>Strahlungsenergie (Licht)</h4><p>Wird durch Licht und Strahlung übertragen – z. B. Sonnenlicht.</p></div>
+        <div class="fcard"><div class="icon">⚛️</div><h4>Kernenergie</h4><p>Ist im Atomkern gespeichert – z. B. Uran im Kernkraftwerk.</p></div>
+      </div>
+      <p class="muted" style="margin-top:12px">Lage-, Bewegungs- und Spannenergie fasst man als <b>mechanische Energie</b> zusammen. Ortsfaktor auf der Erde: <span class="mono">g = 9,81 N/kg</span>.</p>
+    </div>
+    <div class="card">
+      <h3 style="margin-top:0">🎬 Erklärvideo</h3>
+      <p class="muted">Video zum Thema Energie</p>
+      <div class="video"><iframe src="https://www.youtube-nocookie.com/embed/pe0Z7V--_rU" title="Video zum Thema Energie" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" allow="accelerometer; encrypted-media; gyroscope; picture-in-picture; fullscreen" allowfullscreen></iframe></div>
+      <a class="vlink" href="https://www.youtube.com/watch?v=pe0Z7V--_rU" target="_blank" rel="noopener">▶ Video direkt auf YouTube öffnen</a>
+    </div>
+  </div>
+
+  <div class="step" data-title="2 · Zuordnung">
+    <div class="card">
+      <h3 style="margin-top:0">Welche Energieform steckt darin?</h3>
+      <p class="muted">Ziehe jede Karte in das richtige Feld. <b>Am Tablet:</b> erst Karte antippen, dann das Feld antippen. Danach auf „Überprüfen“ klicken.</p>
+      <div class="match" data-set="energie"></div>
+    </div>
+  </div>
+
+  <div class="step" data-title="3 · Aufgaben">
+    <div class="card">
+      <h3 style="margin-top:0">Rechenaufgaben zu Lage- und Bewegungsenergie</h3>
+      <p class="muted">Rechne mit <span class="mono">g = 9,81 N/kg</span>. Beachte: 1 N · m = 1 J und 1 kg · m²/s² = 1 J.</p>
+      <div class="forms3">
+        <div>E<sub>pot</sub> = m · g · h</div><div>m = <span class="frac"><span>E<sub>pot</sub></span><span>g · h</span></span></div><div>h = <span class="frac"><span>E<sub>pot</sub></span><span>m · g</span></span></div>
+      </div>
+      <div class="forms3">
+        <div>E<sub>kin</sub> = ½ · m · v²</div><div>m = <span class="frac"><span>2 · E<sub>kin</sub></span><span>v²</span></span></div><div>v = √<span class="frac"><span>2 · E<sub>kin</sub></span><span>m</span></span></div>
+      </div>
+      <div class="info sigbox">🔢 <b>Gültige Ziffern:</b> Das Ergebnis darf nur so viele gültige Ziffern haben wie die <b>ungenaueste</b> Angabe.
+Gezählt wird ab der ersten Ziffer, die nicht 0 ist: <span class="mono">8,0 m</span> → 2 &nbsp;|&nbsp; <span class="mono">2,34 N</span> → 3 &nbsp;|&nbsp; <span class="mono">0,050 kg</span> → 2.
+Exakte Zahlen (z. B. ½, 2) und Umrechnungsfaktoren (1 min = 60 s) zählen nicht.
+Ist ein Ergebnis wie „1000 J“ nicht eindeutig, schreibe es mit <b>Präfix</b> (1,00 kJ) oder <b>Zehnerpotenz</b> (1,00 · 10³ J). Rundet erst am Ende!</div>
+      <div class="tasks" data-set="energie"></div>
+    </div>
+  </div>
+  <div class="nav"><button class="btn ghost prev">← Zurück</button><button class="btn next">Weiter →</button></div>
+</section>
+
+<!-- =================== LEISTUNG =================== -->
+<section id="leistung" class="topic" data-color="--leistung" data-soft="#fff0e6">
+  <div class="topic-head"><h2>⚡ Leistung</h2></div>
+  <div class="steps"></div>
+
+  <div class="step" data-title="1 · Erklärung">
+    <div class="card">
+      <h3 style="margin-top:0">Was ist Leistung?</h3>
+      <p>Die <b>Leistung</b> gibt an, <b>wie schnell</b> eine Arbeit verrichtet wird. Wer die gleiche Arbeit in kürzerer Zeit schafft, hat eine größere Leistung.</p>
+      <svg viewBox="0 0 660 230" width="100%" role="img" aria-label="Zwei Personen tragen gleich schwere Kisten die Treppe hoch, unterschiedlich schnell">
+        <g id="stairsL">
+          <path d="M20,210 h50 v-30 h50 v-30 h50 v-30 h50 v-30 h50 v-30 h40 v150 z" fill="#f1f3f8" stroke="#475069" stroke-width="2.5"/>
+        </g>
+        <path d="M350,210 h50 v-30 h50 v-30 h50 v-30 h50 v-30 h50 v-30 h40 v150 z" fill="#f1f3f8" stroke="#475069" stroke-width="2.5"/>
+        <!-- Anna -->
+        <g transform="translate(215,30)" stroke="#1c2333" stroke-width="3.5" stroke-linecap="round" fill="none">
+          <circle cx="10" cy="12" r="10" fill="#ffd9b3"/><line x1="10" y1="22" x2="10" y2="52"/><line x1="10" y1="52" x2="0" y2="80"/><line x1="10" y1="52" x2="22" y2="72"/>
+          <line x1="10" y1="30" x2="28" y2="36"/><rect x="24" y="24" width="22" height="20" fill="#fdba74" stroke="#ea580c"/>
+        </g>
+        <text x="130" y="30" font-size="16" font-weight="700" fill="#1c2333">Anna</text>
+        <text x="130" y="50" font-size="15" fill="#5d667a">W = 3000 J</text>
+        <text x="130" y="70" font-size="15" fill="#ea580c" font-weight="700">⏱ t = 10 s</text>
+        <!-- Ben -->
+        <g transform="translate(425,90)" stroke="#1c2333" stroke-width="3.5" stroke-linecap="round" fill="none">
+          <circle cx="10" cy="12" r="10" fill="#ffd9b3"/><line x1="10" y1="22" x2="10" y2="52"/><line x1="10" y1="52" x2="0" y2="80"/><line x1="10" y1="52" x2="22" y2="72"/>
+          <line x1="10" y1="30" x2="28" y2="36"/><rect x="24" y="24" width="22" height="20" fill="#fdba74" stroke="#ea580c"/>
+        </g>
+        <text x="370" y="30" font-size="16" font-weight="700" fill="#1c2333">Ben</text>
+        <text x="370" y="50" font-size="15" fill="#5d667a">W = 3000 J</text>
+        <text x="370" y="70" font-size="15" fill="#ea580c" font-weight="700">⏱ t = 20 s</text>
+        <text x="120" y="226" font-size="15" fill="#1c2333" font-weight="700">P = 300 W</text>
+        <text x="450" y="226" font-size="15" fill="#1c2333" font-weight="700">P = 150 W</text>
+      </svg>
+      <p>Anna und Ben verrichten die <b>gleiche Arbeit</b>. Anna ist doppelt so schnell – ihre Leistung ist also <b>doppelt so groß</b>.</p>
+      <div class="formula-row" style="margin-top:10px">
+        <div class="formula">P = <span class="frac"><span>W</span><span>t</span></span></div>
+        <ul class="legend">
+          <li><b>P</b> Leistung in Watt (W)</li>
+          <li><b>W</b> Arbeit in Joule (J)</li>
+          <li><b>t</b> Zeit in Sekunden (s)</li>
+          <li class="muted">1 W = 1 J/s &nbsp;|&nbsp; 1 kW = 1000 W &nbsp;|&nbsp; 1 PS ≈ 735 W</li>
+        </ul>
+        <div class="tri" data-top="W" data-l="P" data-r="t" data-op="·"></div>
+      </div>
+      <div class="forms3"><div>P = <span class="frac"><span>W</span><span>t</span></span></div><div>W = P · t</div><div>t = <span class="frac"><span>W</span><span>P</span></span></div></div>
+      <div class="info">📌 <b>Vorsicht, Verwechslungsgefahr:</b> Das Formelzeichen für Arbeit ist <b>W</b> (kursiv, von engl. <i>work</i>), die Einheit der Leistung ist ebenfalls <b>W</b> (Watt). Aus dem Zusammenhang wird klar, was gemeint ist.</div>
+      <h3>Typische Leistungen</h3>
+      <div class="bars" id="powerBars"></div>
+    </div>
+    <div class="card">
+      <h3 style="margin-top:0">🎬 Erklärvideo</h3>
+      <p class="muted">Leistung (P = W/t) – Was ist das? | Lehrerschmidt</p>
+      <div class="video"><iframe src="https://www.youtube-nocookie.com/embed/sMqjKEnFoAs" title="Leistung (P = W/t) – Was ist das? | Lehrerschmidt" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" allow="accelerometer; encrypted-media; gyroscope; picture-in-picture; fullscreen" allowfullscreen></iframe></div>
+      <a class="vlink" href="https://www.youtube.com/watch?v=sMqjKEnFoAs" target="_blank" rel="noopener">▶ Video direkt auf YouTube öffnen</a>
+    </div>
+  </div>
+
+  <div class="step" data-title="2 · Arbeit pro Zeit">
+    <div class="card">
+      <h3 style="margin-top:0">Teil A: Das Treppen-Rennen</h3>
+      <p>Beide verrichten die gleiche Hubarbeit von <b>W = 3000 J</b>. Starte das Rennen und beobachte die Zeit.</p>
+      <svg id="raceSvg" viewBox="0 0 640 230" width="100%"></svg>
+      <div class="race-wrap">
+        <div class="fcard"><b>Anna</b> &nbsp; <span class="timer" id="tA">0,0 s</span><div id="pA" class="mono" style="margin-top:6px">&nbsp;</div></div>
+        <div class="fcard"><b>Ben</b> &nbsp; <span class="timer" id="tB">0,0 s</span><div id="pB" class="mono" style="margin-top:6px">&nbsp;</div></div>
+      </div>
+      <p style="margin-top:12px"><button class="btn" id="raceBtn">▶ Rennen starten</button> <span class="muted" style="font-size:14px">(Die Animation läuft im Zeitraffer.)</span></p>
+    </div>
+
+    <div class="card">
+      <h3 style="margin-top:0">Teil B: Leistung = Arbeit, die in <u>jeder Sekunde</u> verrichtet wird</h3>
+      <p>Jedes Kästchen <span class="blk" style="display:inline-block;vertical-align:middle"></span> steht für <b>100 J</b> Arbeit. Die gesamte Arbeit wird gleichmäßig auf die Sekunden verteilt. Die Höhe einer Säule zeigt, wie viel Arbeit <b>pro Sekunde</b> verrichtet wird – das ist die Leistung.</p>
+      <div class="sliders">
+        <div><label>Arbeit W = <span id="wVal" class="mono">1200 J</span></label><input type="range" id="wSl" min="400" max="2400" step="200" value="1200"></div>
+        <div><label>Zeit t = <span id="tVal" class="mono">3 s</span></label><input type="range" id="tSl" min="1" max="8" step="1" value="3"></div>
+      </div>
+      <div class="blocks-area" id="blocks"></div>
+      <p class="bigP" id="pCalc" style="margin-top:12px"></p>
+      <p><button class="btn" id="playBlocks">▶ Sekunde für Sekunde abspielen</button></p>
+      <div class="info">🔎 <b>Probiere aus:</b> Was passiert mit der Leistung, wenn du die Zeit verdoppelst? Was passiert, wenn du die Arbeit verdoppelst?</div>
+    </div>
+  </div>
+
+  <div class="step" data-title="3 · Aufgaben">
+    <div class="card">
+      <h3 style="margin-top:0">Rechenaufgaben zu P = W / t</h3>
+      <p class="muted">Zu jeder Größe gibt es zwei Aufgaben. Denke an: 1 kW = 1000 W und 1 kJ = 1000 J.</p>
+      <div class="forms3"><div>P = <span class="frac"><span>W</span><span>t</span></span></div><div>W = P · t</div><div>t = <span class="frac"><span>W</span><span>P</span></span></div></div>
+      <div class="info sigbox">🔢 <b>Gültige Ziffern:</b> Das Ergebnis darf nur so viele gültige Ziffern haben wie die <b>ungenaueste</b> Angabe.
+Gezählt wird ab der ersten Ziffer, die nicht 0 ist: <span class="mono">8,0 m</span> → 2 &nbsp;|&nbsp; <span class="mono">2,34 N</span> → 3 &nbsp;|&nbsp; <span class="mono">0,050 kg</span> → 2.
+Exakte Zahlen (z. B. ½, 2) und Umrechnungsfaktoren (1 min = 60 s) zählen nicht.
+Ist ein Ergebnis wie „1000 J“ nicht eindeutig, schreibe es mit <b>Präfix</b> (1,00 kJ) oder <b>Zehnerpotenz</b> (1,00 · 10³ J). Rundet erst am Ende!</div>
+      <div class="tasks" data-set="leistung"></div>
+    </div>
+  </div>
+  <div class="nav"><button class="btn ghost prev">← Zurück</button><button class="btn next">Weiter →</button></div>
+</section>
+
+<!-- =================== WIRKUNGSGRAD =================== -->
+<section id="wirkung" class="topic" data-color="--wirkung" data-soft="#f1eafe">
+  <div class="topic-head"><h2>🔥 Wirkungsgrad</h2></div>
+  <div class="steps"></div>
+
+  <div class="step" data-title="1 · Erklärung">
+    <div class="card">
+      <h3 style="margin-top:0">Was ist der Wirkungsgrad?</h3>
+      <p>Bei jeder Energieumwandlung geht ein Teil der Energie als „Verlust“ (meist <b>Wärme</b> durch Reibung) verloren – er ist nicht mehr nutzbar. Der <b>Wirkungsgrad η</b> (sprich: „eta“) gibt an, welcher <b>Anteil</b> der zugeführten Energie tatsächlich genutzt wird.</p>
+      <svg viewBox="0 0 660 260" width="100%" role="img" aria-label="Energieflussdiagramm eines Elektromotors">
+        <!-- Zufluss -->
+        <path d="M20,60 L250,60 L250,160 L20,160 Z" fill="#c4b5fd"/>
+        <text x="40" y="100" font-size="16" font-weight="700" fill="#1c2333">zugeführte Energie</text>
+        <text x="40" y="124" font-size="20" font-family="Georgia,serif" fill="#1c2333">E<tspan font-size="13" dy="4">zu</tspan><tspan dy="-4"> = 100 J</tspan></text>
+        <text x="40" y="146" font-size="13" fill="#3b2a73">(elektrisch)</text>
+        <!-- Motor -->
+        <rect x="250" y="40" width="110" height="140" rx="12" fill="#7c3aed"/>
+        <text x="305" y="105" text-anchor="middle" font-size="16" font-weight="700" fill="#fff">Elektro-</text>
+        <text x="305" y="125" text-anchor="middle" font-size="16" font-weight="700" fill="#fff">motor</text>
+        <!-- Nutzen -->
+        <path d="M360,60 L580,60 L640,105 L580,145 L360,145 Z" fill="#86efac"/>
+        <text x="380" y="94" font-size="16" font-weight="700" fill="#14532d">nutzbare Energie</text>
+        <text x="380" y="120" font-size="20" font-family="Georgia,serif" fill="#14532d">E<tspan font-size="13" dy="4">nutz</tspan><tspan dy="-4"> = 85 J</tspan></text>
+        <text x="380" y="139" font-size="13" fill="#14532d">(Bewegung)</text>
+        <!-- Verlust -->
+        <path d="M360,145 Q 420,150 420,190 L420,220 L440,220 L405,250 L370,220 L390,220 L390,190 Q 390,160 360,160 Z" fill="#fca5a5"/>
+        <text x="455" y="200" font-size="16" font-weight="700" fill="#7f1d1d">Verlust (Wärme)</text>
+        <text x="455" y="224" font-size="20" font-family="Georgia,serif" fill="#7f1d1d">E<tspan font-size="13" dy="4">verl</tspan><tspan dy="-4"> = 15 J</tspan></text>
+        <text x="20" y="30" font-size="15" fill="#1c2333">Energieflussdiagramm: Die Breite der Pfeile zeigt, wie viel Energie fließt.</text>
+      </svg>
+      <div class="formula-row" style="margin-top:10px">
+        <div class="formula">η = <span class="frac"><span>E<sub>nutz</sub></span><span>E<sub>zu</sub></span></span> <small>= <span class="frac"><span>P<sub>nutz</sub></span><span>P<sub>zu</sub></span></span></small></div>
+        <ul class="legend">
+          <li><b>η</b> Wirkungsgrad (ohne Einheit oder in %)</li>
+          <li><b>E<sub>nutz</sub></b> nutzbare (abgegebene) Energie in J</li>
+          <li><b>E<sub>zu</sub></b> zugeführte (aufgenommene) Energie in J</li>
+        </ul>
+        <div class="tri" data-top="E<tspan font-size='13' dy='5'>nutz</tspan>" data-l="η" data-r="E<tspan font-size='13' dy='5'>zu</tspan>" data-op="·"></div>
+      </div>
+      <div class="forms3"><div>η = <span class="frac"><span>E<sub>nutz</sub></span><span>E<sub>zu</sub></span></span></div><div>E<sub>nutz</sub> = η · E<sub>zu</sub></div><div>E<sub>zu</sub> = <span class="frac"><span>E<sub>nutz</sub></span><span>η</span></span></div></div>
+      <p style="margin-top:12px">Im Beispiel: η = 85 J : 100 J = <b>0,85 = 85 %</b>.</p>
+      <div class="info">❗ Der Wirkungsgrad ist <b>immer kleiner als 1</b> (kleiner als 100 %), denn es gibt keine Maschine ohne Verluste. Zum Rechnen musst du Prozent in eine Dezimalzahl umwandeln: <b>30 % = 0,30</b>. Außerdem gilt: E<sub>zu</sub> = E<sub>nutz</sub> + E<sub>verl</sub>.</div>
+      <h3>Typische Wirkungsgrade</h3>
+      <div class="bars" id="etaBars"></div>
+      <h3>Wichtige Umrechnungen für die schweren Aufgaben</h3>
+      <div class="forms3">
+        <div>1 kJ = 1000 J</div><div>1 MJ = 1 000 000 J</div><div>1 kW = 1000 W</div><div>1 min = 60 s</div><div>1 h = 3600 s</div><div>1 Wh = 3600 J</div><div>1 kWh = 3 600 000 J</div><div>E = P · t</div>
+      </div>
+    </div>
+    <div class="card">
+      <h3 style="margin-top:0">🎬 Erklärvideo</h3>
+      <p class="muted">Wirkungsgrad berechnen | Lehrerschmidt</p>
+      <div class="video"><iframe src="https://www.youtube-nocookie.com/embed/gOXEm2Gh5wc" title="Wirkungsgrad berechnen | Lehrerschmidt" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" allow="accelerometer; encrypted-media; gyroscope; picture-in-picture; fullscreen" allowfullscreen></iframe></div>
+      <a class="vlink" href="https://www.youtube.com/watch?v=gOXEm2Gh5wc" target="_blank" rel="noopener">▶ Video direkt auf YouTube öffnen</a>
+    </div>
+  </div>
+
+  <div class="step" data-title="2 · Aufgaben">
+    <div class="card">
+      <h3 style="margin-top:0">Rechenaufgaben zum Wirkungsgrad</h3>
+      <p class="muted">Die Aufgaben werden nach und nach schwieriger. Bei den Aufgaben mit ★★★ musst du vorher Einheiten umrechnen.</p>
+      <div class="forms3"><div>η = <span class="frac"><span>E<sub>nutz</sub></span><span>E<sub>zu</sub></span></span></div><div>E<sub>nutz</sub> = η · E<sub>zu</sub></div><div>E<sub>zu</sub> = <span class="frac"><span>E<sub>nutz</sub></span><span>η</span></span></div></div>
+      <div class="info sigbox">🔢 <b>Gültige Ziffern:</b> Das Ergebnis darf nur so viele gültige Ziffern haben wie die <b>ungenaueste</b> Angabe.
+Gezählt wird ab der ersten Ziffer, die nicht 0 ist: <span class="mono">8,0 m</span> → 2 &nbsp;|&nbsp; <span class="mono">2,34 N</span> → 3 &nbsp;|&nbsp; <span class="mono">0,050 kg</span> → 2.
+Exakte Zahlen (z. B. ½, 2) und Umrechnungsfaktoren (1 min = 60 s) zählen nicht.
+Ist ein Ergebnis wie „1000 J“ nicht eindeutig, schreibe es mit <b>Präfix</b> (1,00 kJ) oder <b>Zehnerpotenz</b> (1,00 · 10³ J). Rundet erst am Ende!</div>
+      <div class="tasks" data-set="wirkung"></div>
+    </div>
+  </div>
+  <div class="nav"><button class="btn ghost prev">← Zurück</button><button class="btn next">Weiter →</button></div>
+</section>
+
+</main>
+
+<script>
+/* ============================ DATEN ============================ */
+const MATCH = {
+  arbeit: {
+    cats: [
+      {id:"hub",  name:"Hubarbeit", icon:"⬆️"},
+      {id:"reib", name:"Reibungsarbeit", icon:"🧱"},
+      {id:"bes",  name:"Beschleunigungsarbeit", icon:"🏃"},
+      {id:"spann",name:"Spannarbeit", icon:"🌀"}
+    ],
+    items: [
+      ["Ein Kran hebt einen Stahlträger auf das Dach.","hub"],
+      ["Du trägst deinen Rucksack die Treppe hinauf.","hub"],
+      ["Ein Gewichtheber stemmt die Hantel nach oben.","hub"],
+      ["Ein schwerer Schrank wird über den Boden geschoben.","reib"],
+      ["Ein Schlitten wird über eine Straße ohne Schnee gezogen.","reib"],
+      ["Ein Brett wird mit Schleifpapier glatt geschliffen.","reib"],
+      ["Ein Sprinter startet aus dem Startblock.","bes"],
+      ["Ein Auto fährt an der Ampel an.","bes"],
+      ["Ein Ball wird kräftig weggeworfen.","bes"],
+      ["Ein Expander wird auseinandergezogen.","spann"],
+      ["Ein Flitzebogen wird gespannt.","spann"],
+      ["Die Feder im Kugelschreiber wird zusammengedrückt.","spann"]
+    ]
+  },
+  energie: {
+    cats: [
+      {id:"pot",  name:"Lageenergie", icon:"⛰️"},
+      {id:"kin",  name:"Bewegungsenergie", icon:"🚗"},
+      {id:"spann",name:"Spannenergie", icon:"🏹"},
+      {id:"therm",name:"Thermische Energie", icon:"🌡️"},
+      {id:"el",   name:"Elektrische Energie", icon:"🔌"},
+      {id:"chem", name:"Chemische Energie", icon:"🍫"},
+      {id:"str",  name:"Strahlungsenergie", icon:"☀️"},
+      {id:"kern", name:"Kernenergie", icon:"⚛️"}
+    ],
+    items: [
+      ["Wasser in einem hoch gelegenen Stausee","pot"],
+      ["Ein Apfel hängt hoch oben am Baum","pot"],
+      ["Ein fahrender Zug","kin"],
+      ["Ein rollender Fußball","kin"],
+      ["Ein gespannter Flitzebogen","spann"],
+      ["Die aufgezogene Feder in einem Spielzeugauto","spann"],
+      ["Heißer Tee in der Tasse","therm"],
+      ["Strom, der aus der Steckdose fließt","el"],
+      ["Ein Stück Schokolade","chem"],
+      ["Benzin im Autotank","chem"],
+      ["Sonnenlicht, das auf eine Solarzelle trifft","str"],
+      ["Uran in einem Kernkraftwerk","kern"]
+    ]
+  }
+};
+
+const TASKS = {
+  arbeit: [
+    {lvl:"gesucht: W", title:"Einkaufswagen",
+     text:"Lisa schiebt einen Einkaufswagen mit einer Kraft von 40,0 N über eine Strecke von 25,0 m. Berechne die verrichtete Arbeit.",
+     given:"F = 40,0 N (3 g. Z.); s = 25,0 m (3 g. Z.)", wanted:"W", formula:"W = F · s",
+     calc:"W = 40,0 N · 25,0 m = 1000 Nm", sig:"kleinste Anzahl: 3 → Ergebnis mit 3 gültigen Ziffern. „1000 J“ wäre nicht eindeutig, daher mit Präfix schreiben.", res:"W = 1,00 kJ"},
+    {lvl:"gesucht: W", title:"Baukran",
+     text:"Ein Baukran hebt einen Betonblock mit einer Gewichtskraft von 12,0 kN um 8,0 m nach oben. Wie groß ist die Hubarbeit?",
+     given:"F = 12,0 kN (3 g. Z.); s = h = 8,0 m (2 g. Z.)", wanted:"W", formula:"W = F · s",
+     calc:"W = 12,0 kN · 8,0 m = 96 kNm", sig:"kleinste Anzahl: 2 (bei 8,0 m) → Ergebnis mit 2 gültigen Ziffern", res:"W = 96 kJ"},
+    {lvl:"gesucht: F", title:"Schlitten",
+     text:"Tom zieht einen Schlitten 60,0 m weit und verrichtet dabei eine Arbeit von 1,80 kJ. Mit welcher Kraft zieht er?",
+     given:"W = 1,80 kJ = 1800 J (3 g. Z.); s = 60,0 m (3 g. Z.)", wanted:"F", formula:"W = F · s &nbsp;⇒&nbsp; F = W : s",
+     calc:"F = 1800 Nm : 60,0 m = 30 N", sig:"kleinste Anzahl: 3 → Ergebnis mit 3 gültigen Ziffern (Null hinter dem Komma ergänzen!)", res:"F = 30,0 N"},
+    {lvl:"gesucht: F", title:"Kiste auf die Ladefläche",
+     text:"Eine Kiste wird auf eine 1,50 m hohe Ladefläche gehoben. Dabei wird eine Arbeit von 752 J verrichtet. Wie groß ist die Gewichtskraft der Kiste?",
+     given:"W = 752 J (3 g. Z.); s = h = 1,50 m (3 g. Z.)", wanted:"F (Gewichtskraft)", formula:"W = F · s &nbsp;⇒&nbsp; F = W : s",
+     calc:"F = 752 Nm : 1,50 m = 501,333… N", sig:"kleinste Anzahl: 3 → Ergebnis mit 3 gültigen Ziffern", res:"F = 501 N"},
+    {lvl:"gesucht: s", title:"Fahrrad schieben",
+     text:"Ein Schüler schiebt sein Fahrrad mit einer Kraft von 85 N und verrichtet dabei eine Arbeit von 2,40 kJ. Wie weit schiebt er das Fahrrad?",
+     given:"F = 85 N (2 g. Z.); W = 2,40 kJ = 2400 J (3 g. Z.)", wanted:"s", formula:"W = F · s &nbsp;⇒&nbsp; s = W : F",
+     calc:"s = 2400 Nm : 85 N = 28,235… m", sig:"kleinste Anzahl: 2 (bei 85 N) → Ergebnis mit 2 gültigen Ziffern", res:"s = 28 m"},
+    {lvl:"gesucht: s", title:"Gewichtheber",
+     text:"Ein Gewichtheber hebt eine Hantel mit einer Gewichtskraft von 1,80 kN nach oben und verrichtet dabei eine Hubarbeit von 3,78 kJ. Wie hoch hebt er die Hantel?",
+     given:"F = 1,80 kN (3 g. Z.); W = 3,78 kJ (3 g. Z.)", wanted:"s (Höhe h)", formula:"W = F · s &nbsp;⇒&nbsp; s = W : F",
+     calc:"s = 3,78 kNm : 1,80 kN = 2,1 m", sig:"kleinste Anzahl: 3 → Ergebnis mit 3 gültigen Ziffern", res:"s = 2,10 m"}
+  ],
+  energie: [
+    {lvl:"gesucht: E<sub>pot</sub>", title:"Bergsteiger",
+     text:"Ein Bergsteiger (m = 75 kg) steigt 185 m hoch. Wie viel Lageenergie hat er dann gewonnen?",
+     given:"m = 75 kg (2 g. Z.); h = 185 m (3 g. Z.); g = 9,81 N/kg (3 g. Z.)", wanted:"E<sub>pot</sub>", formula:"E<sub>pot</sub> = m · g · h",
+     calc:"E<sub>pot</sub> = 75 kg · 9,81 N/kg · 185 m = 136 113,75 Nm", sig:"kleinste Anzahl: 2 (bei 75 kg) → 2 gültige Ziffern. „140 000 J“ wäre nicht eindeutig → Zehnerpotenz oder Präfix verwenden.", res:"E<sub>pot</sub> = 1,4 · 10<sup>5</sup> J = 0,14 MJ"},
+    {lvl:"gesucht: m", title:"Sprungturm",
+     text:"Eine Schwimmerin steht auf dem Sprungturm in 5,00 m Höhe und hat dort eine Lageenergie von 2943 J. Wie groß ist ihre Masse?",
+     given:"E<sub>pot</sub> = 2943 J (4 g. Z.); h = 5,00 m (3 g. Z.); g = 9,81 N/kg (3 g. Z.)", wanted:"m", formula:"E<sub>pot</sub> = m · g · h &nbsp;⇒&nbsp; m = E<sub>pot</sub> : (g · h)",
+     calc:"m = 2943 J : (9,81 N/kg · 5,00 m) = 2943 J : 49,05 J/kg = 60 kg", sig:"kleinste Anzahl: 3 → Ergebnis mit 3 gültigen Ziffern", res:"m = 60,0 kg"},
+    {lvl:"gesucht: h", title:"Kiste im Regal",
+     text:"Eine Kiste mit der Masse 20,0 kg liegt auf einem Regal und hat eine Lageenergie von 1,96 kJ. In welcher Höhe liegt sie?",
+     given:"m = 20,0 kg (3 g. Z.); E<sub>pot</sub> = 1,96 kJ = 1960 J (3 g. Z.); g = 9,81 N/kg (3 g. Z.)", wanted:"h", formula:"E<sub>pot</sub> = m · g · h &nbsp;⇒&nbsp; h = E<sub>pot</sub> : (m · g)",
+     calc:"h = 1960 Nm : (20,0 kg · 9,81 N/kg) = 1960 Nm : 196,2 N = 9,9898… m", sig:"kleinste Anzahl: 3 → Ergebnis mit 3 gültigen Ziffern", res:"h = 9,99 m"},
+    {lvl:"gesucht: E<sub>kin</sub>", title:"Auto",
+     text:"Ein Auto mit der Masse 1,20 t fährt mit einer Geschwindigkeit von 20,0 m/s. Berechne seine Bewegungsenergie.",
+     given:"m = 1,20 t = 1200 kg (3 g. Z.); v = 20,0 m/s (3 g. Z.)", wanted:"E<sub>kin</sub>", formula:"E<sub>kin</sub> = ½ · m · v²",
+     calc:"E<sub>kin</sub> = ½ · 1200 kg · (20,0 m/s)² = 600 kg · 400 m²/s² = 240 000 J", sig:"kleinste Anzahl: 3 (der Faktor ½ ist exakt und zählt nicht) → 3 gültige Ziffern", res:"E<sub>kin</sub> = 2,40 · 10<sup>5</sup> J = 0,240 MJ"},
+    {lvl:"gesucht: m", title:"Rollender Schlitten",
+     text:"Ein Schlitten fährt mit 6,0 m/s den Hang hinunter und hat eine Bewegungsenergie von 455 J. Wie groß ist seine Masse?",
+     given:"E<sub>kin</sub> = 455 J (3 g. Z.); v = 6,0 m/s (2 g. Z.)", wanted:"m", formula:"E<sub>kin</sub> = ½ · m · v² &nbsp;⇒&nbsp; m = 2 · E<sub>kin</sub> : v²",
+     calc:"m = 2 · 455 J : (6,0 m/s)² = 910 J : 36 m²/s² = 25,277… kg", sig:"kleinste Anzahl: 2 (bei 6,0 m/s; die 2 ist exakt) → 2 gültige Ziffern", res:"m = 25 kg"},
+    {lvl:"gesucht: v", title:"Radfahrer",
+     text:"Ein Radfahrer hat zusammen mit seinem Fahrrad eine Masse von 82 kg und eine Bewegungsenergie von 4,00 kJ. Wie schnell fährt er?",
+     given:"m = 82 kg (2 g. Z.); E<sub>kin</sub> = 4,00 kJ = 4000 J (3 g. Z.)", wanted:"v", formula:"E<sub>kin</sub> = ½ · m · v² &nbsp;⇒&nbsp; v = √(2 · E<sub>kin</sub> : m)",
+     calc:"v = √(2 · 4000 J : 82 kg) = √(97,56… m²/s²) = 9,877… m/s", sig:"kleinste Anzahl: 2 (bei 82 kg) → 2 gültige Ziffern", res:"v = 9,9 m/s"}
+  ],
+  leistung: [
+    {lvl:"gesucht: P", title:"Kran",
+     text:"Ein Kran verrichtet beim Heben einer Last eine Arbeit von 60,0 kJ. Er braucht dafür 20,0 s. Berechne seine Leistung.",
+     given:"W = 60,0 kJ = 60 000 J (3 g. Z.); t = 20,0 s (3 g. Z.)", wanted:"P", formula:"P = W : t",
+     calc:"P = 60 000 J : 20,0 s = 3000 J/s", sig:"kleinste Anzahl: 3 → 3 gültige Ziffern. „3000 W“ wäre nicht eindeutig → Präfix verwenden.", res:"P = 3,00 kW"},
+    {lvl:"gesucht: P", title:"Treppenlauf",
+     text:"Mia läuft die Schultreppe hinauf. Sie verrichtet dabei eine Hubarbeit von 2,1 kJ und braucht 7,4 s. Welche Leistung erbringt sie?",
+     given:"W = 2,1 kJ = 2100 J (2 g. Z.); t = 7,4 s (2 g. Z.)", wanted:"P", formula:"P = W : t",
+     calc:"P = 2100 J : 7,4 s = 283,78… W", sig:"kleinste Anzahl: 2 → 2 gültige Ziffern", res:"P = 2,8 · 10<sup>2</sup> W = 0,28 kW"},
+    {lvl:"gesucht: W", title:"Bohrmaschine",
+     text:"Eine Bohrmaschine hat eine Leistung von 750 W und läuft 40,0 s lang. Wie viel Arbeit verrichtet sie in dieser Zeit?",
+     given:"P = 750 W (3 g. Z.); t = 40,0 s (3 g. Z.)", wanted:"W", formula:"P = W : t &nbsp;⇒&nbsp; W = P · t",
+     calc:"W = 750 J/s · 40,0 s = 30 000 J", sig:"kleinste Anzahl: 3 → 3 gültige Ziffern → mit Präfix schreiben", res:"W = 30,0 kJ"},
+    {lvl:"gesucht: W", title:"Wasserkocher",
+     text:"Ein Wasserkocher hat eine Leistung von 2,00 kW. Er ist 95 s lang eingeschaltet. Wie viel Energie wandelt er um?",
+     given:"P = 2,00 kW = 2000 W (3 g. Z.); t = 95 s (2 g. Z.)", wanted:"W", formula:"P = W : t &nbsp;⇒&nbsp; W = P · t",
+     calc:"W = 2000 J/s · 95 s = 190 000 J", sig:"kleinste Anzahl: 2 (bei 95 s) → 2 gültige Ziffern", res:"W = 1,9 · 10<sup>5</sup> J = 0,19 MJ"},
+    {lvl:"gesucht: t", title:"Wasserpumpe",
+     text:"Eine Wasserpumpe mit einer Leistung von 0,50 kW soll eine Arbeit von 30,0 kJ verrichten. Wie lange braucht sie dafür?",
+     given:"P = 0,50 kW = 500 W (2 g. Z.); W = 30,0 kJ = 30 000 J (3 g. Z.)", wanted:"t", formula:"P = W : t &nbsp;⇒&nbsp; t = W : P",
+     calc:"t = 30 000 J : 500 J/s = 60 s", sig:"kleinste Anzahl: 2 → 2 gültige Ziffern. „60 s“ ist nicht eindeutig → Zehnerpotenz oder andere Einheit.", res:"t = 6,0 · 10<sup>1</sup> s = 1,0 min"},
+    {lvl:"gesucht: t", title:"Aufzug",
+     text:"Ein Aufzugmotor hat eine Leistung von 8,0 kW. Um die Kabine nach oben zu fahren, muss er eine Arbeit von 245 kJ verrichten. Wie lange dauert die Fahrt?",
+     given:"P = 8,0 kW (2 g. Z.); W = 245 kJ (3 g. Z.)", wanted:"t", formula:"P = W : t &nbsp;⇒&nbsp; t = W : P",
+     calc:"t = 245 kJ : 8,0 kJ/s = 30,625 s", sig:"kleinste Anzahl: 2 (bei 8,0 kW) → 2 gültige Ziffern", res:"t = 31 s"}
+  ],
+  wirkung: [
+    {lvl:"★ gesucht: η", title:"Elektromotor",
+     text:"Einem Elektromotor werden 0,800 kJ elektrische Energie zugeführt. Er gibt 0,680 kJ als mechanische Energie (Bewegung) ab. Berechne den Wirkungsgrad.",
+     given:"E<sub>zu</sub> = 0,800 kJ (3 g. Z.); E<sub>nutz</sub> = 0,680 kJ (3 g. Z.)", wanted:"η", formula:"η = E<sub>nutz</sub> : E<sub>zu</sub>",
+     calc:"η = 0,680 kJ : 0,800 kJ = 0,85", sig:"kleinste Anzahl: 3 → 3 gültige Ziffern", res:"η = 0,850 = 85,0 %"},
+    {lvl:"★★ gesucht: E<sub>nutz</sub>", title:"Solarzelle",
+     text:"Eine Solarzelle hat einen Wirkungsgrad von 22 %. Auf sie trifft Sonnenlicht mit einer Energie von 5,00 kJ. Wie viel elektrische Energie liefert sie?",
+     given:"η = 22 % = 0,22 (2 g. Z.); E<sub>zu</sub> = 5,00 kJ (3 g. Z.)", wanted:"E<sub>nutz</sub>", formula:"η = E<sub>nutz</sub> : E<sub>zu</sub> &nbsp;⇒&nbsp; E<sub>nutz</sub> = η · E<sub>zu</sub>",
+     calc:"E<sub>nutz</sub> = 0,22 · 5,00 kJ = 1,1 kJ", sig:"kleinste Anzahl: 2 (bei 22 %) → 2 gültige Ziffern", res:"E<sub>nutz</sub> = 1,1 kJ"},
+    {lvl:"★★ gesucht: E<sub>zu</sub>", title:"Automotor",
+     text:"Ein Benzinmotor hat einen Wirkungsgrad von 32 %. Er gibt 90,0 kJ Bewegungsenergie ab. Wie viel chemische Energie (aus dem Benzin) musste ihm zugeführt werden?",
+     given:"η = 32 % = 0,32 (2 g. Z.); E<sub>nutz</sub> = 90,0 kJ (3 g. Z.)", wanted:"E<sub>zu</sub>", formula:"η = E<sub>nutz</sub> : E<sub>zu</sub> &nbsp;⇒&nbsp; E<sub>zu</sub> = E<sub>nutz</sub> : η",
+     calc:"E<sub>zu</sub> = 90,0 kJ : 0,32 = 281,25 kJ", sig:"kleinste Anzahl: 2 (bei 32 %) → 2 gültige Ziffern", res:"E<sub>zu</sub> = 2,8 · 10<sup>2</sup> kJ = 0,28 MJ"},
+    {lvl:"★★★ gesucht: η (mit Umrechnen)", hard:true, title:"Wasserkocher",
+     text:"Ein Wasserkocher mit einer Leistung von 2,00 kW ist 1,50 min eingeschaltet. Das Wasser nimmt dabei 162 kJ Wärme auf. Berechne den Wirkungsgrad des Wasserkochers.",
+     given:"P = 2,00 kW = 2000 W (3 g. Z.); t = 1,50 min = 90,0 s (3 g. Z.); E<sub>nutz</sub> = 162 kJ = 162 000 J (3 g. Z.)", wanted:"η",
+     formula:"① E<sub>zu</sub> = P · t &nbsp;&nbsp; ② η = E<sub>nutz</sub> : E<sub>zu</sub>",
+     calc:"① E<sub>zu</sub> = 2000 W · 90,0 s = 180 000 J = 180 kJ<br>② η = 162 kJ : 180 kJ = 0,9", sig:"kleinste Anzahl: 3 (Umrechnungsfaktoren wie 1 min = 60 s sind exakt) → 3 gültige Ziffern. Zwischenergebnisse nicht runden!", res:"η = 0,900 = 90,0 %"},
+    {lvl:"★★★ gesucht: E<sub>zu</sub> (mit Umrechnen)", hard:true, title:"Akku-Rasenmäher",
+     text:"Ein Akku-Rasenmäher hat einen Wirkungsgrad von 75 %. Während einer Stunde Mähen gibt er 545 kJ mechanische Energie ab. Wie viel elektrische Energie muss der Akku liefern? Gib das Ergebnis in Wattstunden (Wh) an.",
+     given:"η = 75 % = 0,75 (2 g. Z.); E<sub>nutz</sub> = 545 kJ = 545 000 J (3 g. Z.); 1 Wh = 3600 J (exakt)", wanted:"E<sub>zu</sub> in Wh",
+     formula:"η = E<sub>nutz</sub> : E<sub>zu</sub> &nbsp;⇒&nbsp; E<sub>zu</sub> = E<sub>nutz</sub> : η",
+     calc:"E<sub>zu</sub> = 545 000 J : 0,75 = 726 666,7 J<br>Umrechnen: 726 666,7 J : 3600 J/Wh = 201,85… Wh", sig:"kleinste Anzahl: 2 (bei 75 %) → 2 gültige Ziffern. „200 Wh“ wäre nicht eindeutig.", res:"E<sub>zu</sub> = 2,0 · 10<sup>2</sup> Wh = 0,20 kWh"}
+  ]
+};
+
+/* ============================ NAVIGATION ============================ */
+const state = {};
+function goHome(){
+  document.querySelectorAll('.topic').forEach(t=>t.classList.remove('active'));
+  document.getElementById('home').classList.add('active');
+  window.scrollTo(0,0);
+}
+function openTopic(id){
+  document.querySelectorAll('.topic').forEach(t=>t.classList.remove('active'));
+  const sec = document.getElementById(id);
+  sec.classList.add('active');
+  document.documentElement.style.setProperty('--c', getComputedStyle(document.documentElement).getPropertyValue(sec.dataset.color));
+  document.documentElement.style.setProperty('--c-soft', sec.dataset.soft);
+  showStep(id, state[id]||0);
+}
+function showStep(id, n){
+  const sec = document.getElementById(id);
+  const steps = sec.querySelectorAll('.step');
+  n = Math.max(0, Math.min(steps.length-1, n));
+  state[id]=n;
+  steps.forEach((s,i)=>s.classList.toggle('on', i===n));
+  sec.querySelectorAll('.steps button').forEach((b,i)=>b.classList.toggle('on', i===n));
+  sec.querySelector('.prev').disabled = n===0;
+  const nx = sec.querySelector('.next');
+  nx.textContent = n===steps.length-1 ? '⌂ Zur Themenauswahl' : 'Weiter →';
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+document.querySelectorAll('section.topic[data-color]').forEach(sec=>{
+  const bar = sec.querySelector('.steps');
+  sec.querySelectorAll('.step').forEach((s,i)=>{
+    const b=document.createElement('button'); b.textContent=s.dataset.title;
+    b.onclick=()=>showStep(sec.id,i); bar.appendChild(b);
+  });
+  sec.querySelector('.prev').onclick=()=>showStep(sec.id,(state[sec.id]||0)-1);
+  sec.querySelector('.next').onclick=()=>{
+    const n=state[sec.id]||0, total=sec.querySelectorAll('.step').length;
+    if(n>=total-1) goHome(); else showStep(sec.id,n+1);
+  };
+});
+
+/* ============================ FORMELDREIECK ============================ */
+document.querySelectorAll('.tri').forEach(el=>{
+  const {top,l,r,op}=el.dataset;
+  el.innerHTML=`<svg viewBox="0 0 180 150" width="170" role="img" aria-label="Formeldreieck">
+    <polygon points="90,8 172,142 8,142" fill="var(--c-soft)" stroke="var(--c)" stroke-width="3"/>
+    <line x1="49" y1="75" x2="131" y2="75" stroke="var(--c)" stroke-width="3"/>
+    <line x1="90" y1="75" x2="90" y2="142" stroke="var(--c)" stroke-width="3"/>
+    <text x="90" y="62" text-anchor="middle" font-size="26" font-family="Georgia,serif" font-weight="700" fill="#1c2333">${top}</text>
+    <text x="60" y="122" text-anchor="middle" font-size="26" font-family="Georgia,serif" font-weight="700" fill="#1c2333">${l}</text>
+    <text x="122" y="122" text-anchor="middle" font-size="26" font-family="Georgia,serif" font-weight="700" fill="#1c2333">${r}</text>
+  </svg>`;
+});
+
+/* ============================ ZUORDNUNG ============================ */
+function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+function buildMatch(container){
+  const data = MATCH[container.dataset.set];
+  container.innerHTML = `<div class="pool"></div><div class="zones"></div>
+    <p style="margin-top:14px"><button class="btn chk">✔ Überprüfen</button> <button class="btn ghost rst">↺ Neu mischen</button></p>
+    <div class="result"></div>`;
+  const pool = container.querySelector('.pool'), zones = container.querySelector('.zones'), result = container.querySelector('.result');
+  let selected=null, dragged=null;
+  const clearMarks=()=>{container.querySelectorAll('.item').forEach(i=>i.classList.remove('right','wrong'));result.textContent='';};
+  const select=(it)=>{ if(selected) selected.classList.remove('sel'); selected = (selected===it)?null:it; if(selected) selected.classList.add('sel'); };
+  const moveTo=(target)=>{ if(!selected) return; target.appendChild(selected); selected.classList.remove('sel'); selected=null; clearMarks(); };
+
+  shuffle(data.items).forEach(([txt,cat])=>{
+    const it=document.createElement('div'); it.className='item'; it.textContent=txt; it.dataset.cat=cat; it.draggable=true;
+    it.addEventListener('click',e=>{e.stopPropagation(); select(it);});
+    it.addEventListener('dragstart',e=>{dragged=it; e.dataTransfer.setData('text/plain','x');});
+    pool.appendChild(it);
+  });
+  data.cats.forEach(c=>{
+    const z=document.createElement('div'); z.className='zone'; z.dataset.cat=c.id;
+    z.innerHTML=`<h5>${c.icon} ${c.name}</h5>`; zones.appendChild(z);
+  });
+  [pool,...zones.children].forEach(t=>{
+    t.addEventListener('click',()=>moveTo(t));
+    t.addEventListener('dragover',e=>{e.preventDefault(); t.classList.add('over');});
+    t.addEventListener('dragleave',()=>t.classList.remove('over'));
+    t.addEventListener('drop',e=>{e.preventDefault(); t.classList.remove('over'); if(dragged){t.appendChild(dragged); dragged=null; clearMarks();}});
+  });
+  container.querySelector('.chk').onclick=()=>{
+    let ok=0, placed=0;
+    zones.querySelectorAll('.item').forEach(it=>{
+      placed++; const r = it.dataset.cat===it.parentElement.dataset.cat;
+      it.classList.toggle('right',r); it.classList.toggle('wrong',!r); if(r) ok++;
+    });
+    const total=data.items.length, left=pool.querySelectorAll('.item').length;
+    result.innerHTML = `${ok} von ${total} richtig zugeordnet.` + (left?` <span class="muted">(${left} Karte(n) noch nicht zugeordnet)</span>`:'') + (ok===total?' 🎉 Super!':' Rot markierte Karten kannst du verschieben und neu prüfen.');
+    result.style.color = ok===total ? 'var(--ok)' : 'var(--ink)';
+  };
+  container.querySelector('.rst').onclick=()=>buildMatch(container);
+}
+document.querySelectorAll('.match').forEach(buildMatch);
+
+/* ============================ AUFGABEN ============================ */
+function bindHold(btn, wrap){
+  const show=e=>{ if(e) e.preventDefault(); wrap.classList.add('show'); btn.classList.add('active'); };
+  const hide=()=>{ wrap.classList.remove('show'); btn.classList.remove('active'); };
+  btn.addEventListener('pointerdown',e=>{ show(e); try{btn.setPointerCapture(e.pointerId);}catch(_){} });
+  ['pointerup','pointercancel','lostpointercapture','blur'].forEach(ev=>btn.addEventListener(ev,hide));
+  btn.addEventListener('keydown',e=>{ if(e.key===' '||e.key==='Enter') show(e); });
+  btn.addEventListener('keyup',e=>{ if(e.key===' '||e.key==='Enter') hide(); });
+  btn.addEventListener('contextmenu',e=>e.preventDefault());
+  btn.addEventListener('click',e=>e.preventDefault());
+}
+document.querySelectorAll('.tasks').forEach(box=>{
+  TASKS[box.dataset.set].forEach((t,i)=>{
+    const d=document.createElement('div'); d.className='task';
+    d.innerHTML=`<div class="task-head"><h4>Aufgabe ${i+1}: ${t.title}</h4><span class="tag ${t.hard?'hard':''}">${t.lvl}</span></div>
+      <p>${t.text}</p>
+      <button class="hold" type="button">👁 Lösung zeigen (gedrückt halten)</button>
+      <div class="sol-wrap">
+        <div class="sol-hidden">🔒 Lösung ist verdeckt – halte den Knopf gedrückt.</div>
+        <div class="sol"><table>
+          <tr><td>Gegeben:</td><td class="mono">${t.given}</td></tr>
+          <tr><td>Gesucht:</td><td class="mono">${t.wanted}</td></tr>
+          <tr><td>Formel:</td><td class="mono">${t.formula}</td></tr>
+          <tr><td>Rechnung:</td><td class="mono">${t.calc}</td></tr>
+          <tr><td>Gültige Ziffern:</td><td>${t.sig}</td></tr>
+          <tr><td>Ergebnis:</td><td class="mono res">${t.res}</td></tr>
+        </table></div>
+      </div>`;
+    box.appendChild(d);
+    bindHold(d.querySelector('.hold'), d.querySelector('.sol-wrap'));
+  });
+});
+
+/* ============================ BALKEN ============================ */
+function bars(id, rows, max, unit, color){
+  document.getElementById(id).innerHTML = rows.map(([n,v,lbl])=>
+    `<div class="bar"><span class="name">${n}</span><span class="track"><span class="fill" style="display:block;width:${Math.max(1.5,v/max*100)}%;background:${color}"></span></span><span class="val">${lbl}</span></div>`).join('');
+}
+bars('powerBars',[
+  ["LED-Lampe",5,"5 W"],["Mensch (Dauerleistung)",100,"100 W"],["Mensch (kurzzeitig, Sprint)",1000,"≈ 1 kW"],
+  ["Wasserkocher",2000,"2 kW"],["Kleinwagen",60000,"60 kW"]
+], 60000, "", "var(--leistung)");
+document.getElementById('powerBars').insertAdjacentHTML('beforeend','<p class="muted" style="font-size:14px">Die Balken sind maßstabsgetreu – deshalb sind die kleinen Leistungen kaum zu sehen!</p>');
+bars('etaBars',[
+  ["Glühlampe",5,"5 %"],["Benzinmotor",30,"30 %"],["Solarzelle",20,"20 %"],["LED-Lampe",40,"≈ 40 %"],
+  ["Elektromotor",90,"90 %"],["Wasserkocher",90,"≈ 90 %"],["Großer Transformator",99,"99 %"]
+], 100, "%", "var(--wirkung)");
+
+/* ============================ TREPPEN-RENNEN ============================ */
+(function(){
+  const svg=document.getElementById('raceSvg');
+  const stairs=(x)=>`<path d="M${x},210 h45 v-30 h45 v-30 h45 v-30 h45 v-30 h45 v-30 h40 v150 z" fill="#f1f3f8" stroke="#475069" stroke-width="2.5"/>`;
+  const person=(id,col)=>`<g id="${id}"><circle cx="0" cy="-48" r="9" fill="#ffd9b3" stroke="#1c2333" stroke-width="3"/>
+     <line x1="0" y1="-39" x2="0" y2="-14" stroke="#1c2333" stroke-width="3.5"/><line x1="0" y1="-14" x2="-8" y2="0" stroke="#1c2333" stroke-width="3.5"/>
+     <line x1="0" y1="-14" x2="9" y2="0" stroke="#1c2333" stroke-width="3.5"/><line x1="0" y1="-32" x2="14" y2="-28" stroke="#1c2333" stroke-width="3.5"/>
+     <rect x="10" y="-40" width="18" height="16" fill="${col}" stroke="#ea580c" stroke-width="2"/></g>`;
+  svg.innerHTML = stairs(20)+stairs(340)+
+    `<text x="20" y="22" font-size="16" font-weight="700">Anna</text><text x="340" y="22" font-size="16" font-weight="700">Ben</text>
+     <text x="250" y="80" font-size="14" fill="#15803d" font-weight="700">Ziel</text><text x="570" y="80" font-size="14" fill="#15803d" font-weight="700">Ziel</text>`+
+    person('pAnna','#fdba74')+person('pBen','#fdba74');
+  const path=(x0,p)=>{ // auf den Stufen
+    const step=Math.min(5,Math.floor(p*5.0001)); const frac=p*5-step;
+    const x=x0+22+step*45+Math.min(1,frac)*45, y=210-step*30-(frac>0.85?30*(frac-0.85)/0.15:0);
+    return [x, Math.min(210,y)];
+  };
+  const place=(id,x0,p)=>{const [x,y]=path(x0,Math.min(1,p)); document.getElementById(id).setAttribute('transform',`translate(${x},${y})`);};
+  place('pAnna',20,0); place('pBen',340,0);
+  const fmt=v=>v.toFixed(1).replace('.',',');
+  let raf=null;
+  document.getElementById('raceBtn').onclick=()=>{
+    cancelAnimationFrame(raf);
+    const tA=10, tB=20, speed=2.5; // 2,5-facher Zeitraffer
+    document.getElementById('pA').innerHTML='&nbsp;'; document.getElementById('pB').innerHTML='&nbsp;';
+    const start=performance.now();
+    const loop=(now)=>{
+      const sim=(now-start)/1000*speed;
+      place('pAnna',20,sim/tA); place('pBen',340,sim/tB);
+      document.getElementById('tA').textContent=fmt(Math.min(sim,tA))+' s';
+      document.getElementById('tB').textContent=fmt(Math.min(sim,tB))+' s';
+      if(sim>=tA) document.getElementById('pA').innerHTML='P = 3000 J : 10 s = <b>300 W</b>';
+      if(sim>=tB){ document.getElementById('pB').innerHTML='P = 3000 J : 20 s = <b>150 W</b>'; return; }
+      raf=requestAnimationFrame(loop);
+    };
+    raf=requestAnimationFrame(loop);
+  };
+})();
+
+/* ============================ BLÖCKE: ARBEIT PRO SEKUNDE ============================ */
+(function(){
+  const wSl=document.getElementById('wSl'), tSl=document.getElementById('tSl'), area=document.getElementById('blocks');
+  const de=n=>(Math.round(n*10)/10).toString().replace('.',',');
+  let timer=null;
+  function render(hideFrom){
+    const W=+wSl.value, t=+tSl.value, P=W/t, nb=P/100;
+    document.getElementById('wVal').textContent=W+' J'; document.getElementById('tVal').textContent=t+' s';
+    area.innerHTML='';
+    for(let s=1;s<=t;s++){
+      const col=document.createElement('div'); col.className='col'+(hideFrom!==undefined && s>hideFrom?' hide':'');
+      const lbl=document.createElement('div'); lbl.className='lbl'; lbl.textContent=s+'. Sek.'; col.appendChild(lbl);
+      const full=Math.floor(nb+1e-9), frac=nb-full;
+      for(let k=0;k<full;k++){const b=document.createElement('div');b.className='blk';col.appendChild(b);}
+      if(frac>0.01){const b=document.createElement('div');b.className='blk';b.style.height=(10*frac)+'px';b.style.opacity=.55;col.appendChild(b);}
+      area.appendChild(col);
+    }
+    document.getElementById('pCalc').innerHTML=`P = <span class="frac"><span>W</span><span>t</span></span> = <span class="frac"><span>${W} J</span><span>${t} s</span></span> = <b>${de(P)} W</b> &nbsp;<span class="muted" style="font-size:17px;font-family:inherit">→ in jeder Sekunde werden ${de(P)} J Arbeit verrichtet.</span>`;
+  }
+  wSl.oninput=tSl.oninput=()=>{clearInterval(timer);render();};
+  document.getElementById('playBlocks').onclick=()=>{
+    clearInterval(timer); let s=0; render(0);
+    timer=setInterval(()=>{s++; render(s); if(s>=+tSl.value) clearInterval(timer);},700);
+  };
+  render();
+})();
+</script>
+</body>
+</html>
