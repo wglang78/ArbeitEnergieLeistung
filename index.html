@@ -17,7 +17,7 @@ header{background:#1c2333;color:#fff;padding:14px 24px;display:flex;align-items:
 header h1{font-size:20px;margin:0;font-weight:650;flex:1}
 header button{background:#ffffff1a;color:#fff;border:1px solid #ffffff40;border-radius:8px;padding:7px 14px;font:inherit;font-size:15px;cursor:pointer}
 header button:hover{background:#ffffff30}
-main{max-width:1050px;margin:0 auto;padding:24px 18px 60px}
+main{max-width:1050px;margin:0 auto;padding:24px 18px 120px}
 h2{margin:0 0 6px;font-size:28px}
 h3{margin:28px 0 10px;font-size:21px}
 p{margin:8px 0}
@@ -91,13 +91,16 @@ svg text{font-family:"Segoe UI",system-ui,Arial,sans-serif}
 .tag{display:inline-block;background:var(--c-soft);color:var(--c);border-radius:999px;padding:2px 11px;font-size:13px;font-weight:700}
 .tag.hard{background:#fde8e8;color:#b91c1c}
 .task h4{margin:0;font-size:18px}
-.hold{margin-top:10px;background:var(--c);color:#fff;border:none;border-radius:10px;padding:10px 18px;font:inherit;font-weight:600;cursor:pointer;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;touch-action:none}
-.hold.active{filter:brightness(.85);transform:scale(.98)}
-.sol-wrap{margin-top:10px}
-.sol-hidden{color:var(--muted);font-size:14px;font-style:italic}
-.sol{display:none;background:#f6fff8;border:2px solid var(--ok);border-radius:10px;padding:10px 14px}
-.sol-wrap.show .sol{display:block}
+.hold{margin-top:10px;background:var(--c);color:#fff;border:none;border-radius:10px;padding:10px 18px;font:inherit;font-weight:600;cursor:pointer;user-select:none;-webkit-user-select:none;touch-action:manipulation}
+.hold.active{filter:brightness(.85)}
+/* Der Platz für die Lösung ist immer reserviert – die Seite wird beim Aufklappen nicht länger */
+.sol-wrap{margin-top:10px;position:relative}
+.sol{visibility:hidden;background:#f6fff8;border:2px solid var(--ok);border-radius:10px;padding:10px 14px}
+.sol-hidden{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;padding:10px;
+  color:var(--muted);font-size:15px;font-style:italic;background:repeating-linear-gradient(45deg,#f4f6fa,#f4f6fa 10px,#eceff5 10px,#eceff5 20px);border:2px dashed var(--line);border-radius:10px}
+.sol-wrap.show .sol{visibility:visible}
 .sol-wrap.show .sol-hidden{display:none}
+.allsol{margin:8px 0 4px}
 .sol table{border-collapse:collapse}
 .sol td{padding:3px 10px 3px 0;vertical-align:top}
 .sol td:first-child{font-weight:700;white-space:nowrap}
@@ -143,7 +146,7 @@ input[type=range]{width:100%;accent-color:var(--c)}
 <section id="home" class="topic active">
   <h2>Wähle ein Thema</h2>
   <p class="muted">Jedes Thema läuft nach dem gleichen Schema ab: <b>Erklärung</b> mit Schaubild → <b>Übung</b> → <b>Rechenaufgaben</b>.
-  Bei den Rechenaufgaben siehst du die Lösung nur, <b>solange du den Lösungsknopf gedrückt hältst</b>.</p>
+  Bei den Rechenaufgaben kannst du die Lösung mit einem Klick auf den Lösungsknopf <b>aufklappen und wieder zuklappen</b>.</p>
   <div class="topics">
     <button class="topic-btn" style="background:var(--arbeit)" onclick="openTopic('arbeit')">
       <span class="big">🏋️</span><b>Arbeit</b><span class="f">W = F · s</span>
@@ -292,7 +295,7 @@ input[type=range]{width:100%;accent-color:var(--c)}
   <div class="step" data-title="3 · Aufgaben">
     <div class="card">
       <h3 style="margin-top:0">Rechenaufgaben zu W = F · s</h3>
-      <p class="muted">Schreibe immer: <b>Gegeben – Gesucht – Formel – Rechnung – Ergebnis</b>. Halte den Knopf gedrückt, um deine Lösung zu vergleichen.</p>
+      <p class="muted">Schreibe immer: <b>Gegeben – Gesucht – Formel – Rechnung – Ergebnis</b>. Klicke auf den Lösungsknopf, um deine Lösung zu vergleichen.</p>
       <div class="forms3"><div>W = F · s</div><div>F = <span class="frac"><span>W</span><span>s</span></span></div><div>s = <span class="frac"><span>W</span><span>F</span></span></div></div>
       <div class="info sigbox">🔢 <b>Gültige Ziffern:</b> Das Ergebnis darf nur so viele gültige Ziffern haben wie die <b>ungenaueste</b> Angabe.
 Gezählt wird ab der ersten Ziffer, die nicht 0 ist: <span class="mono">8,0 m</span> → 2 &nbsp;|&nbsp; <span class="mono">2,34 N</span> → 3 &nbsp;|&nbsp; <span class="mono">0,050 kg</span> → 2.
@@ -834,24 +837,29 @@ function buildMatch(container){
 document.querySelectorAll('.match').forEach(buildMatch);
 
 /* ============================ AUFGABEN ============================ */
-function bindHold(btn, wrap){
-  const show=e=>{ if(e) e.preventDefault(); wrap.classList.add('show'); btn.classList.add('active'); };
-  const hide=()=>{ wrap.classList.remove('show'); btn.classList.remove('active'); };
-  btn.addEventListener('pointerdown',e=>{ show(e); try{btn.setPointerCapture(e.pointerId);}catch(_){} });
-  ['pointerup','pointercancel','lostpointercapture','blur'].forEach(ev=>btn.addEventListener(ev,hide));
-  btn.addEventListener('keydown',e=>{ if(e.key===' '||e.key==='Enter') show(e); });
-  btn.addEventListener('keyup',e=>{ if(e.key===' '||e.key==='Enter') hide(); });
-  btn.addEventListener('contextmenu',e=>e.preventDefault());
-  btn.addEventListener('click',e=>e.preventDefault());
+function bindToggle(btn, wrap){
+  btn.addEventListener('click',()=>{
+    const on=wrap.classList.toggle('show');
+    btn.classList.toggle('active',on);
+    btn.textContent = on ? '🙈 Lösung ausblenden' : '👁 Lösung anzeigen';
+  });
 }
 document.querySelectorAll('.tasks').forEach(box=>{
+  const all=document.createElement('button'); all.className='btn ghost allsol'; all.type='button'; all.textContent='👁 Alle Lösungen anzeigen';
+  all.onclick=()=>{
+    const open=all.dataset.open!=='1'; all.dataset.open=open?'1':'0';
+    all.textContent=open?'🙈 Alle Lösungen ausblenden':'👁 Alle Lösungen anzeigen';
+    box.querySelectorAll('.task').forEach(t=>{const w=t.querySelector('.sol-wrap'),b=t.querySelector('.hold');
+      w.classList.toggle('show',open); b.classList.toggle('active',open); b.textContent=open?'🙈 Lösung ausblenden':'👁 Lösung anzeigen';});
+  };
+  box.before(all);
   TASKS[box.dataset.set].forEach((t,i)=>{
     const d=document.createElement('div'); d.className='task';
     d.innerHTML=`<div class="task-head"><h4>Aufgabe ${i+1}: ${t.title}</h4><span class="tag ${t.hard?'hard':''}">${t.lvl}</span></div>
       <p>${t.text}</p>
-      <button class="hold" type="button">👁 Lösung zeigen (gedrückt halten)</button>
+      <button class="hold" type="button">👁 Lösung anzeigen</button>
       <div class="sol-wrap">
-        <div class="sol-hidden">🔒 Lösung ist verdeckt – halte den Knopf gedrückt.</div>
+        <div class="sol-hidden">🔒 Hier erscheint die Lösung – erst selbst rechnen, dann auf „Lösung anzeigen“ klicken.</div>
         <div class="sol"><table>
           <tr><td>Gegeben:</td><td class="mono">${t.given}</td></tr>
           <tr><td>Gesucht:</td><td class="mono">${t.wanted}</td></tr>
@@ -862,7 +870,7 @@ document.querySelectorAll('.tasks').forEach(box=>{
         </table></div>
       </div>`;
     box.appendChild(d);
-    bindHold(d.querySelector('.hold'), d.querySelector('.sol-wrap'));
+    bindToggle(d.querySelector('.hold'), d.querySelector('.sol-wrap'));
   });
 });
 
